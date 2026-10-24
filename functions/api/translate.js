@@ -1,11 +1,11 @@
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request }) {
 try {
 const body = await request.json();
 const { q, source, target } = body || {};
 
 if (typeof q !== "string" || !q.trim()) {
   return Response.json(
-    { error: "Enter text to translate." },
+    { error: "Please enter text to translate." },
     { status: 400 }
   );
 }
@@ -17,73 +17,66 @@ if (q.length > 5000) {
   );
 }
 
-if (
-  typeof target !== "string" ||
-  !/^[a-z]{2,3}$/.test(target)
-) {
+if (typeof target !== "string" || !/^[a-z]{2,3}$/.test(target)) {
   return Response.json(
-    { error: "Choose a valid target language." },
+    { error: "Please choose a valid target language." },
     { status: 400 }
   );
 }
 
-const sourceLanguage = source || "auto";
+const sourceLanguage =
+  typeof source === "string" &&
+  /^[a-z]{2,3}$/.test(source) &&
+  source !== "auto"
+    ? source
+    : "en";
 
-const baseUrl = (
-  env.LIBRETRANSLATE_URL || "https://libretranslate.com"
-).replace(/\/+$/, "");
+const text = q.trim();
 
-const payload = {
-  q: q.trim(),
-  source: sourceLanguage,
-  target,
-  format: "text"
-};
-
-if (env.LIBRETRANSLATE_API_KEY) {
-  payload.api_key = env.LIBRETRANSLATE_API_KEY;
+if (new TextEncoder().encode(text).length > 500) {
+  return Response.json(
+    { error: "Please translate shorter text (maximum 500 bytes per request)." },
+    { status: 413 }
+  );
 }
 
-const response = await fetch(`${baseUrl}/translate`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Accept": "application/json"
-  },
-  body: JSON.stringify(payload),
-  signal: AbortSignal.timeout(25000)
+const params = new URLSearchParams({
+  q: text,
+  langpair: `${sourceLanguage}|${target}`
 });
 
-const data = await response.json().catch(() => ({}));
+const response = await fetch(
+  `https://api.mymemory.translated.net/get?${params.toString()}`,
+  {
+    method: "GET",
+    headers: { "Accept": "application/json" },
+    signal: AbortSignal.timeout(20000)
+  }
+);
 
-if (!response.ok) {
+const data = await response.json();
+
+if (!response.ok || data.responseStatus !== 200) {
   return Response.json(
-    {
-      error:
-        data.error ||
-        "The translation service is unavailable. Check its URL and API key."
-    },
+    { error: data.responseDetails || "The translation service could not translate this text." },
     { status: 502 }
   );
 }
 
-if (typeof data.translatedText !== "string") {
+const translatedText = data.responseData?.translatedText;
+
+if (typeof translatedText !== "string" || !translatedText.trim()) {
   return Response.json(
-    { error: "The translation service returned no valid translation." },
+    { error: "The translation service returned no translation." },
     { status: 502 }
   );
 }
 
-return Response.json({
-  translatedText: data.translatedText
-});
+return Response.json({ translatedText });
 
 } catch (error) {
 return Response.json(
-{
-error:
-"Translation failed. Check the connection and translation service settings."
-},
+{ error: "Translation failed. Please check your internet connection and try again." },
 { status: 502 }
 );
 }

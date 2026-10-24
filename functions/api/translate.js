@@ -85,14 +85,16 @@ for (const chunk of chunks) {
   );
 
   if (!response.ok) {
-    return Response.json(
-      {
-        error:
-          "The translation service returned an error. Please try again later."
-      },
-      { status: 502 }
-    );
-  }
+  const details = await response.text();
+
+  return Response.json(
+    {
+      error: "MyMemory HTTP " + response.status,
+      details: details.slice(0, 500)
+    },
+    { status: 502 }
+  );
+}
 
   const data = await response.json();
 

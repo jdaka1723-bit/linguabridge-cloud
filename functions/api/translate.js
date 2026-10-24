@@ -17,7 +17,10 @@ if (q.length > 5000) {
   );
 }
 
-if (typeof target !== "string" || !/^[a-z]{2,3}$/.test(target)) {
+if (
+  typeof target !== "string" ||
+  !/^[a-z]{2,3}$/.test(target)
+) {
   return Response.json(
     { error: "Please choose a valid target language." },
     { status: 400 }
@@ -26,48 +29,50 @@ if (typeof target !== "string" || !/^[a-z]{2,3}$/.test(target)) {
 
 const sourceLanguage =
   typeof source === "string" &&
-  /^[a-z]{2,3}$/.test(source) &&
-  source !== "auto"
+  /^[a-z]{2,3}$/.test(source)
     ? source
-    : "en";
-
-const text = q.trim();
-
-if (new TextEncoder().encode(text).length > 500) {
-  return Response.json(
-    { error: "Please translate shorter text (maximum 500 bytes per request)." },
-    { status: 413 }
-  );
-}
-
-const params = new URLSearchParams({
-  q: text,
-  langpair: `${sourceLanguage}|${target}`
-});
+    : "auto";
 
 const response = await fetch(
-  `https://api.mymemory.translated.net/get?${params.toString()}`,
+  "https://de.libretranslate.com/translate",
   {
-    method: "GET",
-    headers: { "Accept": "application/json" },
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify({
+      q: q.trim(),
+      source: sourceLanguage,
+      target,
+      format: "text",
+      api_key: ""
+    }),
     signal: AbortSignal.timeout(20000)
   }
 );
 
 const data = await response.json();
 
-if (!response.ok || data.responseStatus !== 200) {
+if (!response.ok) {
   return Response.json(
-    { error: data.responseDetails || "The translation service could not translate this text." },
+    {
+      error:
+        data.error ||
+        "The free translation server is unavailable. Please try again later."
+    },
     { status: 502 }
   );
 }
 
-const translatedText = data.responseData?.translatedText;
+const translatedText = data.translatedText;
 
-if (typeof translatedText !== "string" || !translatedText.trim()) {
+if (
+  typeof translatedText !== "string" ||
+  !translatedText.trim()
+) {
   return Response.json(
-    { error: "The translation service returned no translation." },
+    { error: "The translation server returned no translation." },
     { status: 502 }
   );
 }
@@ -76,7 +81,10 @@ return Response.json({ translatedText });
 
 } catch (error) {
 return Response.json(
-{ error: "Translation failed. Please check your internet connection and try again." },
+{
+error:
+"Translation failed. The free translation server may be unavailable. Please try again."
+},
 { status: 502 }
 );
 }

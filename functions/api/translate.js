@@ -34,7 +34,7 @@ const sourceLanguage =
     : "auto";
 
 const response = await fetch(
-  "https://de.libretranslate.com/translate",
+  "https://translate.argosopentech.com/translate",
   {
     method: "POST",
     headers: {

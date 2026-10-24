@@ -149,9 +149,9 @@ return Response.json(
 error:
 error.name === "TimeoutError"
 ? "The translation service took too long to respond. Please try again."
-: "Translation failed. Please check your connection and try again."
-},
-{ status: 502 }
+: "Translation failed. Please check your connection and try again.",
+details: String(error.message || error).slice(0, 300)
+error. status: 502 }
 );
 }
 }

@@ -10,7 +10,9 @@ if (typeof q !== "string" || !q.trim()) {
   );
 }
 
-if (q.length > 5000) {
+const text = q.trim();
+
+if (text.length > 5000) {
   return Response.json(
     { error: "Text must not exceed 5,000 characters." },
     { status: 413 }
@@ -19,7 +21,7 @@ if (q.length > 5000) {
 
 if (
   typeof target !== "string" ||
-  !/^[a-z]{2,3}$/.test(target)
+  !/^[a-z]{2,3}$/i.test(target)
 ) {
   return Response.json(
     { error: "Please choose a valid target language." },
@@ -29,61 +31,123 @@ if (
 
 const sourceLanguage =
   typeof source === "string" &&
-  /^[a-z]{2,3}$/.test(source)
-    ? source
-    : "auto";
+  /^[a-z]{2,3}$/i.test(source) &&
+  source.toLowerCase() !== "auto"
+    ? source.toLowerCase()
+    : "autodetect";
 
-const response = await fetch(
-  "https://translate.argosopentech.com/translate",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify({
-      q: q.trim(),
-      source: sourceLanguage,
-      target,
-      format: "text",
-      api_key: ""
-    }),
-    signal: AbortSignal.timeout(20000)
+// Split text into chunks of no more than 450 UTF-8 bytes.
+// This leaves room below MyMemory's 500-byte limit.
+function splitText(input, maxBytes = 450) {
+  const chunks = [];
+  let current = "";
+
+  for (const word of input.match(/\S+\s*/g) || []) {
+    const candidate = current + word;
+    const size = new TextEncoder().encode(candidate).length;
+
+    if (size > maxBytes && current) {
+      chunks.push(current.trim());
+      current = word;
+    } else {
+      current = candidate;
+    }
+
+    if (new TextEncoder().encode(current).length > maxBytes) {
+      throw new Error(
+        "A single word is too long to translate."
+      );
+    }
   }
-);
 
-const data = await response.json();
+  if (current.trim()) {
+    chunks.push(current.trim());
+  }
 
-if (!response.ok) {
-  return Response.json(
+  return chunks;
+}
+
+const chunks = splitText(text);
+const translations = [];
+
+for (const chunk of chunks) {
+  const params = new URLSearchParams({
+    q: chunk,
+    langpair: `${sourceLanguage}|${target.toLowerCase()}`
+  });
+
+  const response = await fetch(
+    `https://api.mymemory.translated.net/get?${params}`,
     {
-      error:
-        data.error ||
-        "The free translation server is unavailable. Please try again later."
-    },
-    { status: 502 }
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(20000)
+    }
   );
+
+  if (!response.ok) {
+    return Response.json(
+      {
+        error:
+          "The translation service returned an error. Please try again later."
+      },
+      { status: 502 }
+    );
+  }
+
+  const data = await response.json();
+
+  if (
+    data.quotaFinished === true ||
+    data.responseStatus === 429
+  ) {
+    return Response.json(
+      {
+        error:
+          "The free translation limit has been reached. Please try again later."
+      },
+      { status: 429 }
+    );
+  }
+
+  if (data.responseStatus !== 200) {
+    return Response.json(
+      {
+        error:
+          data.responseDetails ||
+          "The translation service could not translate this text."
+      },
+      { status: 502 }
+    );
+  }
+
+  const translated = data.responseData?.translatedText;
+
+  if (
+    typeof translated !== "string" ||
+    !translated.trim()
+  ) {
+    return Response.json(
+      {
+        error: "The translation service returned no translation."
+      },
+      { status: 502 }
+    );
+  }
+
+  translations.push(translated.trim());
 }
 
-const translatedText = data.translatedText;
-
-if (
-  typeof translatedText !== "string" ||
-  !translatedText.trim()
-) {
-  return Response.json(
-    { error: "The translation server returned no translation." },
-    { status: 502 }
-  );
-}
-
-return Response.json({ translatedText });
+return Response.json({
+  translatedText: translations.join(" ")
+});
 
 } catch (error) {
 return Response.json(
 {
 error:
-"Translation failed. The free translation server may be unavailable. Please try again."
+error.name === "TimeoutError"
+? "The translation service took too long to respond. Please try again."
+: "Translation failed. Please check your connection and try again."
 },
 { status: 502 }
 );

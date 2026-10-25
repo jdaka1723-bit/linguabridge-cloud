@@ -1,4 +1,4 @@
- async function onRequestPost({ request }) {
+  function onRequestPost({ request }) {
 try {
 const body = await request.json();
 const { q, source, target } = body || {};

@@ -1,158 +1,123 @@
-  function onRequestPost({ request }) {
-try {
-const body = await request.json();
-const { q, source, target } = body || {};
+export async function onRequestPost({ request, env }) {
+  try {
+    const body = await request.json();
+    const { q, source, target } = body || {};
 
-if (typeof q !== "string" || !q.trim()) {
-  return Response.json(
-    { error: "Please enter text to translate." },
-    { status: 400 }
-  );
-}
-
-const text = q.trim();
-
-if (text.length > 5000) {
-  return Response.json(
-    { error: "Text must not exceed 5,000 characters." },
-    { status: 413 }
-  );
-}
-
-if (
-  typeof target !== "string" ||
-  !/^[a-z]{2,3}$/i.test(target)
-) {
-  return Response.json(
-    { error: "Please choose a valid target language." },
-    { status: 400 }
-  );
-}
-
-const sourceLanguage =
-  typeof source === "string" &&
-  /^[a-z]{2,3}$/i.test(source) &&
-  source.toLowerCase() !== "auto"
-    ? source.toLowerCase()
-    : "autodetect";
-
-// Split text into chunks of no more than 450 UTF-8 bytes.
-// This leaves room below MyMemory's 500-byte limit.
-function splitText(input, maxBytes = 450) {
-  const chunks = [];
-  let current = "";
-
-  for (const word of input.match(/\S+\s*/g) || []) {
-    const candidate = current + word;
-    const size = new TextEncoder().encode(candidate).length;
-
-    if (size > maxBytes && current) {
-      chunks.push(current.trim());
-      current = word;
-    } else {
-      current = candidate;
-    }
-
-    if (new TextEncoder().encode(current).length > maxBytes) {
-      throw new Error(
-        "A single word is too long to translate."
+    if (typeof q !== "string" || !q.trim()) {
+      return Response.json(
+        { error: "Please enter text to translate." },
+        { status: 400 }
       );
     }
-  }
 
-  if (current.trim()) {
-    chunks.push(current.trim());
-  }
+    const text = q.trim();
 
-  return chunks;
-}
-
-const chunks = splitText(text);
-const translations = [];
-
-for (const chunk of chunks) {
-  const params = new URLSearchParams({
-    q: chunk,
-    langpair: `${sourceLanguage}|${target.toLowerCase()}`
-  });
-
-  const response = await fetch(
-    `https://api.mymemory.translated.net/get?${params}`,
-    {
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(20000)
+    if (text.length > 5000) {
+      return Response.json(
+        { error: "Text must not exceed 5,000 characters." },
+        { status: 413 }
+      );
     }
-  );
 
-  if (!response.ok) {
-  const details = await response.text();
+    const languages = {
+      en: "English",
+      sn: "Shona",
+      nd: "Ndebele",
+      fr: "French",
+      es: "Spanish",
+      pt: "Portuguese",
+      de: "German",
+      it: "Italian",
+      sw: "Swahili",
+      ar: "Arabic",
+      zh: "Chinese",
+      hi: "Hindi",
+      ja: "Japanese",
+      ru: "Russian"
+    };
 
-  return Response.json(
-    {
-      error: "MyMemory HTTP " + response.status,
-      details: details.slice(0, 500)
-    },
-    { status: 502 }
-  );
-}
+    if (!languages[target]) {
+      return Response.json(
+        { error: "Please choose a supported target language." },
+        { status: 400 }
+      );
+    }
 
-  const data = await response.json();
+    if (
+      source !== "auto" &&
+      !languages[source]
+    ) {
+      return Response.json(
+        { error: "Please choose a supported source language." },
+        { status: 400 }
+      );
+    }
 
-  if (
-    data.quotaFinished === true ||
-    data.responseStatus === 429
-  ) {
-    return Response.json(
+    if (!env.AI) {
+      return Response.json(
+        {
+          error: "Cloudflare Workers AI is not configured. Check the AI binding."
+        },
+        { status: 500 }
+      );
+    }
+
+    const sourceInstruction = source === "auto"
+      ? "Identify the source language automatically."
+      : "The source language is " + languages[source] + ".";
+
+    const prompt = [
+      "You are a professional translator.",
+      "Translate the text into " + languages[target] + ".",
+      sourceInstruction,
+      "Preserve the meaning, tone, names, numbers, and formatting.",
+      "For Shona and Ndebele, use natural language where supported.",
+      "Return only the translation, without explanations or quotation marks.",
+      "",
+      "Text to translate:",
+      text
+    ].join("\n");
+
+    const result = await env.AI.run(
+      "@cf/meta/llama-3.1-8b-instruct",
       {
-        error:
-          "The free translation limit has been reached. Please try again later."
-      },
-      { status: 429 }
+        messages: [
+          {
+            role: "system",
+            content: "You translate text accurately and return only the translation."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 2048,
+        temperature: 0.2
+      }
     );
-  }
 
-  if (data.responseStatus !== 200) {
+    const translated = result?.response?.trim();
+
+    if (!translated) {
+      return Response.json(
+        { error: "The AI service returned an empty translation." },
+        { status: 502 }
+      );
+    }
+
+    return Response.json({
+      translatedText: translated
+    });
+
+  } catch (error) {
+    console.error("Translation error:", error);
+
     return Response.json(
       {
-        error:
-          data.responseDetails ||
-          "The translation service could not translate this text."
+        error: "Translation failed. Please try again.",
+        details: String(error.message || error).slice(0, 300)
       },
       { status: 502 }
     );
   }
-
-  const translated = data.responseData?.translatedText;
-
-  if (
-    typeof translated !== "string" ||
-    !translated.trim()
-  ) {
-    return Response.json(
-      {
-        error: "The translation service returned no translation."
-      },
-      { status: 502 }
-    );
-  }
-
-  translations.push(translated.trim());
-}
-
-return Response.json({
-  translatedText: translations.join(" ")
-});
-
-} catch (error) {
-return Response.json(
-{
-error:
-error.name === "TimeoutError"
-? "The translation service took too long to respond. Please try again."
-: "Translation failed. Please check your connection and try again.",
-details: String(error.message || error).slice(0, 300)
-},
-{ status: 502 }
-);
-}
 }

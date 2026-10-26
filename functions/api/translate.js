@@ -1,7 +1,34 @@
+const LANGUAGES = {
+  en: "English",
+  sn: "Shona",
+  nd: "Ndebele",
+  fr: "French",
+  es: "Spanish",
+  pt: "Portuguese",
+  de: "German",
+  it: "Italian",
+  sw: "Swahili",
+  ar: "Arabic",
+  zh: "Chinese",
+  hi: "Hindi",
+  ja: "Japanese",
+  ru: "Russian"
+};
+
 export async function onRequestPost({ request, env }) {
   try {
-    const body = await request.json();
-    const { q, source, target } = body || {};
+    let body;
+
+    try {
+      body = await request.json();
+    } catch {
+      return Response.json(
+        { error: "Invalid request. Please try again." },
+        { status: 400 }
+      );
+    }
+
+    const { q, source = "auto", target } = body || {};
 
     if (typeof q !== "string" || !q.trim()) {
       return Response.json(
@@ -19,34 +46,14 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
-    const languages = {
-      en: "English",
-      sn: "Shona",
-      nd: "Ndebele",
-      fr: "French",
-      es: "Spanish",
-      pt: "Portuguese",
-      de: "German",
-      it: "Italian",
-      sw: "Swahili",
-      ar: "Arabic",
-      zh: "Chinese",
-      hi: "Hindi",
-      ja: "Japanese",
-      ru: "Russian"
-    };
-
-    if (!languages[target]) {
+    if (!LANGUAGES[target]) {
       return Response.json(
         { error: "Please choose a supported target language." },
         { status: 400 }
       );
     }
 
-    if (
-      source !== "auto" &&
-      !languages[source]
-    ) {
+    if (source !== "auto" && !LANGUAGES[source]) {
       return Response.json(
         { error: "Please choose a supported source language." },
         { status: 400 }
@@ -56,25 +63,52 @@ export async function onRequestPost({ request, env }) {
     if (!env.AI) {
       return Response.json(
         {
-          error: "Cloudflare Workers AI is not configured. Check the AI binding."
+          error: "Cloudflare AI is not configured. Please check the AI binding."
         },
         { status: 500 }
       );
     }
 
-    const sourceInstruction = source === "auto"
-      ? "Identify the source language automatically."
-      : "The source language is " + languages[source] + ".";
+    const sourceLanguage =
+      source === "auto"
+        ? "Detect the source language automatically."
+        : `The source language is ${LANGUAGES[source]}.`;
+
+    const localLanguageGuidance = {
+      sn: [
+        "Produce natural, grammatically correct Shona.",
+        "Use standard written Shona and familiar vocabulary.",
+        "Preserve the original meaning rather than translating word for word.",
+        "Do not substitute Ndebele or another language for Shona."
+      ],
+      nd: [
+        "Produce natural, grammatically correct Ndebele (isiNdebele).",
+        "Use standard written Ndebele and familiar vocabulary.",
+        "Preserve the original meaning rather than translating word for word.",
+        "Do not substitute Shona or Zulu for Ndebele."
+      ]
+    };
+
+    const extraGuidance = localLanguageGuidance[target] || [
+      "Use natural, grammatically correct language.",
+      "Preserve the original meaning and tone."
+    ];
 
     const prompt = [
-      "You are a professional translator.",
-      "Translate the text into " + languages[target] + ".",
-      sourceInstruction,
-      "Preserve the meaning, tone, names, numbers, and formatting.",
-      "For Shona and Ndebele, use natural language where supported.",
-      "Return only the translation, without explanations or quotation marks.",
+      "TASK: Translate the supplied text.",
+      `TARGET LANGUAGE: ${LANGUAGES[target]}.`,
+      `SOURCE LANGUAGE: ${sourceLanguage}`,
       "",
-      "Text to translate:",
+      "TRANSLATION RULES:",
+      "- Translate all of the supplied text.",
+      "- Preserve meaning, tone, names, numbers, dates and punctuation.",
+      "- Preserve line breaks and formatting where practical.",
+      "- Do not summarize, explain, or add new information.",
+      "- Return only the translated text.",
+      "- If the source text is already in the target language, return it unchanged.",
+      ...extraGuidance.map(rule => "- " + rule),
+      "",
+      "TEXT TO TRANSLATE:",
       text
     ].join("\n");
 
@@ -84,7 +118,8 @@ export async function onRequestPost({ request, env }) {
         messages: [
           {
             role: "system",
-            content: "You translate text accurately and return only the translation."
+            content:
+              "You are a careful professional translator. Follow the requested source and target languages. Never invent missing information. Return only the translation, without introductory phrases or explanations."
           },
           {
             role: "user",
@@ -92,15 +127,20 @@ export async function onRequestPost({ request, env }) {
           }
         ],
         max_tokens: 2048,
-        temperature: 0.2
+        temperature: 0.1
       }
     );
 
-    const translated = result?.response?.trim();
+    const translated =
+      typeof result?.response === "string"
+        ? result.response.trim()
+        : "";
 
     if (!translated) {
+      console.error("Cloudflare AI returned no translation.");
+
       return Response.json(
-        { error: "The AI service returned an empty translation." },
+        { error: "The translation service returned no text. Please try again." },
         { status: 502 }
       );
     }
@@ -110,12 +150,11 @@ export async function onRequestPost({ request, env }) {
     });
 
   } catch (error) {
-    console.error("Translation error:", error);
+    console.error("LinguaBridge translation error:", error);
 
     return Response.json(
       {
-        error: "Translation failed. Please try again.",
-        details: String(error.message || error).slice(0, 300)
+        error: "Translation failed. Please try again."
       },
       { status: 502 }
     );

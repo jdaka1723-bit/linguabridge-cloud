@@ -69,6 +69,11 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
+const sourceLanguage =
+  source === "auto"
+    ? "Detect the source language automatically."
+    : `The source language is ${LANGUAGES[source]}.`;
+
     const localLanguageGuidance = {
   sn: [
     "Translate into natural, grammatically correct Zimbabwean Shona (chiShona).",

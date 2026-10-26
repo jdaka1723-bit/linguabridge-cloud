@@ -113,7 +113,7 @@ export async function onRequestPost({ request, env }) {
     ].join("\n");
 
     const result = await env.AI.run(
-     "@cf/meta/llama-3.1-8b-instruct-fp8"
+     "@cf/meta/llama-3.1-8b-instruct-fp8",
       {
         messages: [
           {

@@ -15,6 +15,49 @@ const LANGUAGES = {
   ru: "Russian"
 };
 
+// Initial dictionary of common words and phrases.
+// These entries are used only for exact matches.
+const COMMON_TRANSLATIONS = {
+  en: {
+    sn: {
+      "mother": "Amai",
+      "father": "Baba",
+      "hello": "Mhoro",
+      "thank you": "Ndatenda",
+      "yes": "Ehe",
+      "no": "Kwete"
+    },
+    nd: {
+      "mother": "Umama",
+      "father": "Ubaba",
+      "hello": "Salibonani",
+      "thank you": "Ngiyabonga",
+      "yes": "Yebo",
+      "no": "Hatshi"
+    }
+  },
+  sn: {
+    en: {
+      "amai": "Mother",
+      "baba": "Father",
+      "mhoro": "Hello",
+      "ndatenda": "Thank you",
+      "ehe": "Yes",
+      "kwete": "No"
+    }
+  },
+  nd: {
+    en: {
+      "umama": "Mother",
+      "ubaba": "Father",
+      "salibonani": "Hello",
+      "ngiyabonga": "Thank you",
+      "yebo": "Yes",
+      "hatshi": "No"
+    }
+  }
+};
+
 export async function onRequestPost({ request, env }) {
   try {
     let body;
@@ -60,6 +103,22 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
+    // Use the dictionary only when the source language is explicitly selected.
+    const dictionary =
+      source !== "auto"
+        ? COMMON_TRANSLATIONS[source]?.[target]
+        : null;
+
+    const dictionaryTranslation =
+      dictionary?.[text.toLowerCase()];
+
+    if (dictionaryTranslation) {
+      return Response.json({
+        translatedText: dictionaryTranslation,
+        source: "dictionary"
+      });
+    }
+
     if (!env.AI) {
       return Response.json(
         {
@@ -69,33 +128,29 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
-const sourceLanguage =
-  source === "auto"
-    ? "Detect the source language automatically."
-    : `The source language is ${LANGUAGES[source]}.`;
+    const sourceLanguage =
+      source === "auto"
+        ? "Detect the source language automatically."
+        : `The source language is ${LANGUAGES[source]}.`;
 
     const localLanguageGuidance = {
-  sn: [
-    "Translate into natural, grammatically correct Zimbabwean Shona (chiShona).",
-    "Use everyday expressions that native Shona speakers understand.",
-    "For a greeting such as 'Good morning, how are you?', use the appropriate Shona greeting, such as 'Mangwanani akanaka, wakadini?'",
-    "Translate the complete meaning of the original text.",
-    "Do not confuse Shona with Ndebele or another language.",
-    "Do not invent words, repeat phrases, or add explanations.",
-    "Return only the Shona translation."
-  ],
-
-  nd: [
-    "Translate into natural, grammatically correct Zimbabwean Ndebele (isiNdebele).",
-    "Use standard written isiNdebele and natural expressions used by native speakers.",
-    "Preserve the complete meaning and tone of the original text.",
-    "Do not translate into Shona or substitute isiZulu for isiNdebele.",
-    "Do not invent words, repeat phrases, or add explanations.",
-    "For greetings, use natural isiNdebele expressions appropriate to the context.",
-    "If uncertain about a translation, do not invent a phrase.",
-    "Return only the isiNdebele translation."
-  ]
-};
+      sn: [
+        "Translate into natural, grammatically correct Zimbabwean Shona (chiShona).",
+        "Use everyday expressions that native Shona speakers understand.",
+        "Translate the complete meaning of the original text.",
+        "Do not confuse Shona with Ndebele or another language.",
+        "Do not invent words, repeat phrases, or add explanations.",
+        "Return only the Shona translation."
+      ],
+      nd: [
+        "Translate into natural, grammatically correct Zimbabwean Ndebele (isiNdebele).",
+        "Use standard written isiNdebele and natural expressions used by native speakers.",
+        "Preserve the complete meaning and tone of the original text.",
+        "Do not translate into Shona or substitute isiZulu for isiNdebele.",
+        "Do not invent words, repeat phrases, or add explanations.",
+        "Return only the isiNdebele translation."
+      ]
+    };
 
     const extraGuidance = localLanguageGuidance[target] || [
       "Use natural, grammatically correct language.",
@@ -121,7 +176,7 @@ const sourceLanguage =
     ].join("\n");
 
     const result = await env.AI.run(
-     "@cf/meta/llama-3.1-8b-instruct-fp8",
+      "@cf/meta/llama-3.1-8b-instruct-fp8",
       {
         messages: [
           {
@@ -148,7 +203,9 @@ const sourceLanguage =
       console.error("Cloudflare AI returned no translation.");
 
       return Response.json(
-        { error: "The translation service returned no text. Please try again." },
+        {
+          error: "The translation service returned no text. Please try again."
+        },
         { status: 502 }
       );
     }
@@ -161,9 +218,7 @@ const sourceLanguage =
     console.error("LinguaBridge translation error:", error);
 
     return Response.json(
-      {
-        error: "Translation failed. Please try again."
-      },
+      { error: "Translation failed. Please try again." },
       { status: 502 }
     );
   }

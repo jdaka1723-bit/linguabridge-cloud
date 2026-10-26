@@ -75,14 +75,17 @@ export async function onRequestPost({ request, env }) {
         : `The source language is ${LANGUAGES[source]}.`;
 
     const localLanguageGuidance = {
-      sn: [
-        "Produce natural, grammatically correct Shona.",
-        "Use standard written Shona and familiar vocabulary.",
-        "Preserve the original meaning rather than translating word for word.",
-        "Do not substitute Ndebele or another language for Shona."
-      ],
-      nd: [
-        "Produce natural, grammatically correct Ndebele (isiNdebele).",
+     sn: [
+  "Translate into natural, correct, everyday Zimbabwean Shona (chiShona).",
+  "Use common Shona greetings and expressions that native speakers actually use.",
+  "For 'Good morning, how are you?', a suitable translation is 'Mangwanani akanaka, wakadini?'",
+  "Do not translate 'How are you?' as 'I am fine' or repeat words.",
+  "Translate the complete meaning of the original sentence; do not replace it with a simple greeting.",
+  "Never invent words, repeat phrases, or include explanations.",
+  "Return only the Shona translation."
+],
+ nd: [
+      "Produce natural, grammatically correct Ndebele (isiNdebele).",
         "Use standard written Ndebele and familiar vocabulary.",
         "Preserve the original meaning rather than translating word for word.",
         "Do not substitute Shona or Zulu for Ndebele."

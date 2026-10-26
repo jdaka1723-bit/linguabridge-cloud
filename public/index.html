@@ -3,17 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <meta name="theme-color" content="#1746a2">
-
 <title>LinguaBridge - Language Translator</title>
 
-<script src="https://js.puter.com/v2/"></script>
-
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -29,15 +23,8 @@ header {
     text-align: center;
 }
 
-header h1 {
-    margin: 0 0 8px;
-    font-size: 29px;
-}
-
-header p {
-    margin: 0;
-    color: #e1eaff;
-}
+header h1 { margin: 0 0 8px; font-size: 29px; }
+header p { margin: 0; color: #e1eaff; }
 
 main {
     max-width: 760px;
@@ -79,10 +66,7 @@ button {
     font-weight: bold;
 }
 
-button:disabled {
-    opacity: 0.6;
-    cursor: wait;
-}
+button:disabled { opacity: 0.6; cursor: wait; }
 
 .swap {
     background: #e8efff;
@@ -109,10 +93,7 @@ textarea {
     color: #18243a;
 }
 
-textarea:focus,
-select:focus {
-    outline: 2px solid #8cb2ff;
-}
+textarea:focus, select:focus { outline: 2px solid #8cb2ff; }
 
 .counter {
     text-align: right;
@@ -128,10 +109,7 @@ select:focus {
     margin: 12px 0 18px;
 }
 
-.tools button {
-    background: #eaf0fa;
-    color: #203b68;
-}
+.tools button { background: #eaf0fa; color: #203b68; }
 
 .primary {
     width: 100%;
@@ -141,17 +119,9 @@ select:focus {
     font-size: 17px;
 }
 
-.result {
-    margin-top: 18px;
-}
-
-.result h3 {
-    margin: 0 0 10px;
-}
-
-#output {
-    background: #f8faff;
-}
+.result { margin-top: 18px; }
+.result h3 { margin: 0 0 10px; }
+#output { background: #f8faff; }
 
 .status {
     min-height: 24px;
@@ -163,8 +133,8 @@ select:focus {
 }
 
 .notice {
-    background: #fff7df;
-    color: #6b4b00;
+    background: #eaf5ff;
+    color: #17416f;
     padding: 12px;
     border-radius: 10px;
     font-size: 13px;
@@ -180,32 +150,16 @@ footer {
 }
 
 @media (max-width: 420px) {
-    .card {
-        padding: 14px;
-    }
-
-    .languages {
-        gap: 6px;
-    }
-
-    select {
-        font-size: 12px;
-        padding: 11px 3px;
-    }
-
-    .swap {
-        padding: 10px;
-    }
-
-    button {
-        font-size: 14px;
-    }
+    .card { padding: 14px; }
+    .languages { gap: 6px; }
+    select { font-size: 12px; padding: 11px 3px; }
+    .swap { padding: 10px; }
+    button { font-size: 14px; }
 }
 </style>
 </head>
 
 <body>
-
 <header>
     <h1>🌐 LinguaBridge</h1>
     <p>Break language barriers. Connect with the world.</p>
@@ -215,7 +169,6 @@ footer {
 <section class="card">
 
     <div class="languages">
-
         <select id="source" aria-label="Source language">
             <option value="auto">Detect language</option>
             <option value="en">English</option>
@@ -234,13 +187,8 @@ footer {
             <option value="ru">Russian</option>
         </select>
 
-        <button
-            type="button"
-            class="swap"
-            id="swap"
-            aria-label="Swap languages"
-            title="Swap languages"
-        >⇄</button>
+        <button type="button" class="swap" id="swap"
+                aria-label="Swap languages" title="Swap languages">⇄</button>
 
         <select id="target" aria-label="Target language">
             <option value="sn" selected>Shona</option>
@@ -258,50 +206,31 @@ footer {
             <option value="ja">Japanese</option>
             <option value="ru">Russian</option>
         </select>
-
     </div>
 
     <label for="input">Text to translate</label>
-
-    <textarea
-        id="input"
-        maxlength="5000"
-        placeholder="Enter or speak the text you want to translate..."
-    ></textarea>
+    <textarea id="input" maxlength="5000"
+        placeholder="Enter or speak the text you want to translate..."></textarea>
 
     <div class="counter" id="count">0 / 5000</div>
 
     <div class="tools">
-
         <button type="button" id="mic">🎙️ Speak</button>
-
         <button type="button" id="clear">✕ Clear</button>
-
     </div>
 
-    <button type="button" class="primary" id="translate">
-        Translate text
-    </button>
+    <button type="button" class="primary" id="translate">Translate text</button>
 
     <div class="result">
-
         <h3>Translation</h3>
-
-        <textarea
-            id="output"
-            readonly
+        <textarea id="output" readonly
             placeholder="Your translation will appear here..."
-            aria-label="Translated text"
-        ></textarea>
+            aria-label="Translated text"></textarea>
 
         <div class="tools">
-
             <button type="button" id="copy">📋 Copy</button>
-
             <button type="button" id="listen">🔊 Listen</button>
-
         </div>
-
     </div>
 
     <div class="status" id="status" role="status" aria-live="polite">
@@ -309,13 +238,10 @@ footer {
     </div>
 
     <div class="notice">
-        <strong>AI translation:</strong>
-        LinguaBridge uses Puter.js to access AI translation.
-        Depending on your usage, Puter may ask you to sign in or
-        authorize access. Free allowances and usage limits may apply.
-        Translation quality and speech availability vary by language.
+        <strong>Translation service:</strong>
+        LinguaBridge uses its Cloudflare translation service.
+        Translation quality and speech availability may vary by language.
     </div>
-
 </section>
 </main>
 
@@ -327,7 +253,6 @@ footer {
 "use strict";
 
 const $ = id => document.getElementById(id);
-
 const input = $("input");
 const output = $("output");
 const source = $("source");
@@ -336,73 +261,24 @@ const status = $("status");
 const translateButton = $("translate");
 
 const languages = {
-    en: "English",
-    sn: "Shona",
-    nd: "Ndebele",
-    fr: "French",
-    es: "Spanish",
-    pt: "Portuguese",
-    de: "German",
-    it: "Italian",
-    sw: "Swahili",
-    ar: "Arabic",
-    zh: "Chinese",
-    hi: "Hindi",
-    ja: "Japanese",
-    ru: "Russian"
+    en: "English", sn: "Shona", nd: "Ndebele", fr: "French",
+    es: "Spanish", pt: "Portuguese", de: "German", it: "Italian",
+    sw: "Swahili", ar: "Arabic", zh: "Chinese", hi: "Hindi",
+    ja: "Japanese", ru: "Russian"
 };
 
 const speechLanguages = {
-    sn: "sn-ZW",
-    nd: "nd-ZW",
-    en: "en-US",
-    fr: "fr-FR",
-    es: "es-ES",
-    pt: "pt-PT",
-    de: "de-DE",
-    it: "it-IT",
-    sw: "sw",
-    ar: "ar-SA",
-    zh: "zh-CN",
-    hi: "hi-IN",
-    ja: "ja-JP",
-    ru: "ru-RU"
+    sn: "sn-ZW", nd: "nd-ZW", en: "en-US", fr: "fr-FR",
+    es: "es-ES", pt: "pt-PT", de: "de-DE", it: "it-IT",
+    sw: "sw", ar: "ar-SA", zh: "zh-CN", hi: "hi-IN",
+    ja: "ja-JP", ru: "ru-RU"
 };
 
 input.addEventListener("input", () => {
     $("count").textContent = input.value.length + " / 5000";
 });
 
-function getAIText(response) {
-    if (typeof response === "string") {
-        return response.trim();
-    }
-
-    if (response && response.message) {
-        const content = response.message.content;
-
-        if (typeof content === "string") {
-            return content.trim();
-        }
-
-        if (Array.isArray(content)) {
-            return content
-                .filter(part => part && part.type === "text")
-                .map(part => part.text || "")
-                .join("")
-                .trim();
-        }
-    }
-
-    if (response && typeof response.text === "string") {
-        return response.text.trim();
-    }
-
-    return "";
-}
-
 translateButton.addEventListener("click", async () => {
-
     const text = input.value.trim();
 
     if (!text) {
@@ -417,89 +293,62 @@ translateButton.addEventListener("click", async () => {
     }
 
     if (source.value !== "auto" && source.value === target.value) {
-        status.textContent =
-            "Choose two different languages, or use Detect language.";
+        status.textContent = "Choose two different languages, or use Detect language.";
         return;
     }
-
-    if (!window.puter || !puter.ai || !puter.ai.chat) {
-        status.textContent =
-            "Puter.js could not load. Check your internet connection and refresh the page.";
-        return;
-    }
-
-    const sourceName = source.value === "auto"
-        ? "the detected source language"
-        : languages[source.value];
-
-    const targetName = languages[target.value];
-
-    const prompt =
-        "You are a professional multilingual translator. " +
-        "Translate the user's text into " + targetName + ". " +
-        (source.value === "auto"
-            ? "Automatically identify the source language. "
-            : "The source language is " + sourceName + ". ") +
-        "Preserve the original meaning, tone, names, numbers, " +
-        "punctuation and formatting as much as possible. " +
-        "For Shona and Ndebele, use natural, correct language. " +
-        "Return only the translated text. Do not include explanations, " +
-        "labels, quotation marks or introductory phrases.\n\n" +
-        "Text to translate:\n" + text;
 
     translateButton.disabled = true;
     translateButton.textContent = "Translating...";
     output.value = "";
-    status.textContent = "Connecting to the AI translation service...";
+    status.textContent = "Translating with LinguaBridge...";
 
     try {
-
-        const response = await puter.ai.chat(prompt, {
-            model: "gpt-5.4-nano"
+        const response = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                q: text,
+                source: source.value,
+                target: target.value
+            })
         });
 
-        const translation = getAIText(response);
-
-        if (!translation) {
-            throw new Error(
-                "The AI returned an empty translation. Please try again."
-            );
+        let data;
+        try {
+            data = await response.json();
+        } catch {
+            throw new Error("The server returned an invalid response.");
         }
 
-        output.value = translation;
-        status.textContent =
-            "Translation completed: " + targetName + ".";
+        if (!response.ok) {
+            throw new Error(data.error || "Translation request failed.");
+        }
+
+        if (typeof data.translatedText !== "string" ||
+            !data.translatedText.trim()) {
+            throw new Error("The server did not return a translation.");
+        }
+
+        output.value = data.translatedText.trim();
+        status.textContent = "Translation completed: " + languages[target.value] + ".";
 
     } catch (error) {
-
         console.error("LinguaBridge translation error:", error);
-
-        const message = error && error.message
-            ? error.message
-            : String(error);
-
-        status.textContent =
-            "Translation failed: " + message +
-            " Check your internet connection and Puter account authorization, then try again.";
-
+        status.textContent = "Translation failed: " +
+            (error.message || "Please try again.");
     } finally {
-
         translateButton.disabled = false;
         translateButton.textContent = "Translate text";
-
     }
 });
 
 $("swap").addEventListener("click", () => {
-
     if (source.value === "auto") {
-        status.textContent =
-            "Select a source language before swapping languages.";
+        status.textContent = "Select a source language before swapping languages.";
         return;
     }
 
     const oldSource = source.value;
-
     source.value = target.value;
     target.value = oldSource;
 
@@ -510,86 +359,66 @@ $("swap").addEventListener("click", () => {
     }
 
     status.textContent = "Languages swapped. Tap Translate text.";
-
 });
 
 $("clear").addEventListener("click", () => {
-
     input.value = "";
     output.value = "";
     $("count").textContent = "0 / 5000";
     status.textContent = "Text cleared.";
-    speechSynthesisCancel();
 
-});
-
-function speechSynthesisCancel() {
     if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
     }
-}
+});
 
 $("copy").addEventListener("click", async () => {
-
     if (!output.value) {
         status.textContent = "There is no translation to copy.";
         return;
     }
 
     try {
-
         await navigator.clipboard.writeText(output.value);
         status.textContent = "Translation copied.";
-
-    } catch (error) {
-
+    } catch {
         output.focus();
         output.select();
-        status.textContent =
-            "Translation selected. Use your device's Copy command.";
-
+        status.textContent = "Translation selected. Use your device's Copy command.";
     }
 });
 
 $("listen").addEventListener("click", () => {
-
     if (!output.value) {
         status.textContent = "Translate some text first.";
         return;
     }
 
     if (!("speechSynthesis" in window)) {
-        status.textContent =
-            "Speech output is not supported by this browser.";
+        status.textContent = "Speech output is not supported by this browser.";
         return;
     }
 
-    speechSynthesisCancel();
+    window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(output.value);
-
     utterance.lang = speechLanguages[target.value] || "en-US";
-
-    utterance.onerror = () => {
-        status.textContent =
-            "Speech could not be played. Check your device's text-to-speech settings.";
-    };
 
     utterance.onend = () => {
         status.textContent = "Finished playing the translation.";
     };
 
+    utterance.onerror = () => {
+        status.textContent = "Speech could not be played. Check your device's text-to-speech settings.";
+    };
+
     window.speechSynthesis.speak(utterance);
-
     status.textContent = "Playing translated speech...";
-
 });
 
 $("mic").addEventListener("click", () => {
-
     const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
+        window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
         status.textContent =
@@ -612,25 +441,13 @@ $("mic").addEventListener("click", () => {
     };
 
     recognition.onresult = event => {
-
-        const transcript = event.results[0][0].transcript;
-
-        input.value = transcript;
-
-        $("count").textContent =
-            input.value.length + " / 5000";
-
-        status.textContent =
-            "Speech captured. Tap Translate text.";
-
+        input.value = event.results[0][0].transcript;
+        $("count").textContent = input.value.length + " / 5000";
+        status.textContent = "Voice input received.";
     };
 
     recognition.onerror = event => {
-
-        status.textContent =
-            "Microphone error: " + event.error +
-            ". Check browser microphone permission and try again.";
-
+        status.textContent = "Voice input failed: " + event.error;
     };
 
     recognition.onend = () => {
@@ -638,20 +455,12 @@ $("mic").addEventListener("click", () => {
     };
 
     try {
-
         recognition.start();
-
-    } catch (error) {
-
+    } catch {
         $("mic").disabled = false;
-
-        status.textContent =
-            "Could not start the microphone. Please try again.";
-
+        status.textContent = "Could not start the microphone. Please try again.";
     }
-
 });
 </script>
-
 </body>
 </html>

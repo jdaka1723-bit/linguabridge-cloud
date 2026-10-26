@@ -69,28 +69,28 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
-    const sourceLanguage =
-      source === "auto"
-        ? "Detect the source language automatically."
-        : `The source language is ${LANGUAGES[source]}.`;
-
     const localLanguageGuidance = {
-     sn: [
-  "Translate into natural, correct, everyday Zimbabwean Shona (chiShona).",
-  "Use common Shona greetings and expressions that native speakers actually use.",
-  "For 'Good morning, how are you?', a suitable translation is 'Mangwanani akanaka, wakadini?'",
-  "Do not translate 'How are you?' as 'I am fine' or repeat words.",
-  "Translate the complete meaning of the original sentence; do not replace it with a simple greeting.",
-  "Never invent words, repeat phrases, or include explanations.",
-  "Return only the Shona translation."
-],
- nd: [
-      "Produce natural, grammatically correct Ndebele (isiNdebele).",
-        "Use standard written Ndebele and familiar vocabulary.",
-        "Preserve the original meaning rather than translating word for word.",
-        "Do not substitute Shona or Zulu for Ndebele."
-      ]
-    };
+  sn: [
+    "Translate into natural, grammatically correct Zimbabwean Shona (chiShona).",
+    "Use everyday expressions that native Shona speakers understand.",
+    "For a greeting such as 'Good morning, how are you?', use the appropriate Shona greeting, such as 'Mangwanani akanaka, wakadini?'",
+    "Translate the complete meaning of the original text.",
+    "Do not confuse Shona with Ndebele or another language.",
+    "Do not invent words, repeat phrases, or add explanations.",
+    "Return only the Shona translation."
+  ],
+
+  nd: [
+    "Translate into natural, grammatically correct Zimbabwean Ndebele (isiNdebele).",
+    "Use standard written isiNdebele and natural expressions used by native speakers.",
+    "Preserve the complete meaning and tone of the original text.",
+    "Do not translate into Shona or substitute isiZulu for isiNdebele.",
+    "Do not invent words, repeat phrases, or add explanations.",
+    "For greetings, use natural isiNdebele expressions appropriate to the context.",
+    "If uncertain about a translation, do not invent a phrase.",
+    "Return only the isiNdebele translation."
+  ]
+};
 
     const extraGuidance = localLanguageGuidance[target] || [
       "Use natural, grammatically correct language.",

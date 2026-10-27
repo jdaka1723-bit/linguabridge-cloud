@@ -495,7 +495,16 @@ nd: [
       "@cf/meta/llama-3.1-8b-instruct-fp8",
       {
         messages: [
-          {
+{
+role: "system",
+content:
+"You are a careful translator specializing in accurate, natural translations. Follow the specified source and target languages exactly. For Shona, use Zimbabwean chiShona. For Ndebele, use Zimbabwean isiNdebele, not isiZulu. Preserve the meaning, context, tone, and grammatical relationships of the original. Do not guess when uncertain, invent words, or add explanations. Return only the translated text."
+},
+{
+role: "user",
+content: prompt
+}
+], 
             role: "system",
            content:
 "You are a careful translator specializing in accurate, natural translations. Follow the specified source and target languages exactly. For Shona, use Zimbabwean chiShona. For Ndebele, use Zimbabwean isiNdebele, not isiZulu. Preserve the meaning, context, tone, and grammatical relationships of the original. Do not guess when uncertain, invent words, or add explanations. Return only the translated text."

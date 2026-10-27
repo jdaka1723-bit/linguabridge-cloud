@@ -442,23 +442,31 @@ if (dictionaryTranslation) {
         : `The source language is ${LANGUAGES[source]}.`;
 
     const localLanguageGuidance = {
-      sn: [
-        "Translate into natural, grammatically correct Zimbabwean Shona (chiShona).",
-        "Use everyday expressions that native Shona speakers understand.",
-        "Translate the complete meaning of the original text.",
-        "Do not confuse Shona with Ndebele or another language.",
-        "Do not invent words, repeat phrases, or add explanations.",
-        "Return only the Shona translation."
-      ],
-      nd: [
-        "Translate into natural, grammatically correct Zimbabwean Ndebele (isiNdebele).",
-        "Use standard written isiNdebele and natural expressions used by native speakers.",
-        "Preserve the complete meaning and tone of the original text.",
-        "Do not translate into Shona or substitute isiZulu for isiNdebele.",
-        "Do not invent words, repeat phrases, or add explanations.",
-        "Return only the isiNdebele translation."
-      ]
-    };
+sn: [
+"Translate into natural, grammatically correct Zimbabwean Shona (chiShona).",
+"Use standard written Shona and expressions that native speakers commonly use.",
+"Translate the complete meaning of the original text, including context and tone.",
+"For family relationships, distinguish older siblings from younger siblings where the context requires it.",
+"Use the correct Shona word for the meaning intended; do not confuse a boy with a brother or a woman with a sister.",
+"For sentences, translate the whole sentence naturally rather than translating each word separately.",
+"Keep names, numbers, dates, and important details unchanged.",
+"Do not confuse Shona with Ndebele, isiZulu, or another language.",
+"Do not invent words, add explanations, or repeat the translation.",
+"Return only the Shona translation."
+],
+nd: [
+"Translate into natural, grammatically correct Zimbabwean Ndebele (isiNdebele).",
+"Use standard written isiNdebele and expressions that native speakers commonly use.",
+"Translate the complete meaning of the original text, including context and tone.",
+"For family relationships, distinguish older siblings from younger siblings where the context requires it.",
+"Use the correct Ndebele word for the intended family relationship; do not substitute a boy for a brother or a woman for a sister.",
+"For sentences, translate the whole sentence naturally rather than translating each word separately.",
+"Keep names, numbers, dates, and important details unchanged.",
+"Do not translate into Shona or substitute isiZulu for isiNdebele.",
+"Do not invent words, add explanations, or repeat the translation.",
+"Return only the Ndebele translation."
+]
+};
 
     const extraGuidance = localLanguageGuidance[target] || [
       "Use natural, grammatically correct language.",

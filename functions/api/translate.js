@@ -222,3 +222,4 @@ export async function onRequestPost({ request, env }) {
       { status: 502 }
     );
   }
+}

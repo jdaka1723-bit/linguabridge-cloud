@@ -104,20 +104,25 @@ export async function onRequestPost({ request, env }) {
     }
 
     // Use the dictionary only when the source language is explicitly selected.
-    const dictionary =
-      source !== "auto"
-        ? COMMON_TRANSLATIONS[source]?.[target]
-        : null;
+    const normalizedText = text
+  .trim()
+  .toLocaleLowerCase()
+  .replace(/[.!?]+$/g, "")
+  .trim();
 
-    const dictionaryTranslation =
-      dictionary?.[text.toLowerCase()];
+const dictionary =
+  source !== "auto"
+    ? COMMON_TRANSLATIONS[source]?.[target]
+    : null;
 
-    if (dictionaryTranslation) {
-      return Response.json({
-        translatedText: dictionaryTranslation,
-        source: "dictionary"
-      });
-    }
+const dictionaryTranslation = dictionary?.[normalizedText];
+
+if (dictionaryTranslation) {
+  return Response.json({
+    translatedText: dictionaryTranslation,
+    source: "dictionary"
+  });
+}
 
     if (!env.AI) {
       return Response.json(

@@ -497,11 +497,9 @@ nd: [
         messages: [
           {
             role: "system",
-            content:
-              "You are a careful professional translator. Follow the requested source and target languages. Never invent missing information. Return only the translation, without introductory phrases or explanations."
-          },
-          {
-            role: "user",
+           content:
+"You are a careful translator specializing in accurate, natural translations. Follow the specified source and target languages exactly. For Shona, use Zimbabwean chiShona. For Ndebele, use Zimbabwean isiNdebele, not isiZulu. Preserve the meaning, context, tone, and grammatical relationships of the original. Do not guess when uncertain, invent words, or add explanations. Return only the translated text."
+         role: "user",
             content: prompt
           }
         ],

@@ -69,6 +69,8 @@ const COMMON_TRANSLATIONS = {
       "today": "Nhasi",
       "tomorrow": "Mangwana",
       "yesterday": "Nezuro",
+      "toilet": "Chimbuzi",
+        "latrine": "Chimbuzi",
 
       // Food and drink
       "food": "Chikafu",
